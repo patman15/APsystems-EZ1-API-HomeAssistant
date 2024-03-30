@@ -16,7 +16,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 from APsystemsEZ1 import APsystemsEZ1M, Status
 from homeassistant.helpers.device_registry import DeviceInfo
-from .const import DOMAIN
+from .const import DOMAIN, CONF_COORDINATOR
 import asyncio
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
@@ -33,10 +33,10 @@ async def async_setup_entry(
 ) -> None:
     """Set up the sensor platform."""
     config = hass.data[DOMAIN][config_entry.entry_id]
-    api = APsystemsEZ1M(ip_address=config[CONF_IP_ADDRESS])
+    api = config[CONF_COORDINATOR]._api
 
     numbers = [
-        MaxPower(api, device_name=config[CONF_NAME], sensor_name="Power Status", sensor_id="power_status")
+        MaxPower(api, device_name=config[CONF_NAME], sensor_name="Power output", sensor_id="power_output")
     ]
 
     add_entities(numbers, True)
@@ -72,13 +72,13 @@ class MaxPower(SwitchEntity):
     @property
     def name(self):
         """Return the name of the sensor."""
-        return f"APsystems {self._device_name} {self._name}"
+        return self._name
 
     async def async_turn_on(self, **kwargs):
         try:
             await self._api.set_device_power_status(0)
             self._attr_available = True
-        except ((client_exceptions.ClientConnectionError, asyncio.TimeoutError), asyncio.TimeoutError):
+        except (client_exceptions.ClientConnectionError, asyncio.TimeoutError, asyncio.TimeoutError):
             self._attr_available = False
 
     async def async_turn_off(self, **kwargs):

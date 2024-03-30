@@ -18,7 +18,7 @@ from homeassistant import config_entries
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 from APsystemsEZ1 import APsystemsEZ1M
-from .const import DOMAIN
+from .const import DOMAIN, CONF_COORDINATOR
 from homeassistant.helpers.device_registry import DeviceInfo
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
@@ -35,7 +35,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up the sensor platform."""
     config = hass.data[DOMAIN][config_entry.entry_id]
-    api = APsystemsEZ1M(ip_address=config[CONF_IP_ADDRESS])
+    api = config[CONF_COORDINATOR]._api
 
     numbers = [
         MaxPower(api, device_name=config[CONF_NAME], sensor_name="Max Output Power", sensor_id="max_output_power")

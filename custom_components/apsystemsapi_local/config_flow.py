@@ -13,9 +13,10 @@ DATA_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_IP_ADDRESS): str,
         vol.Required(CONF_NAME): str,
-        vol.Optional("check", default=True): bool
+        vol.Optional("check", default=True): bool,
     }
 )
+
 
 class APsystemsLocalAPIFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for Blueprint."""
@@ -23,8 +24,8 @@ class APsystemsLocalAPIFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
     async def async_step_user(
-            self,
-            user_input: dict | None = None,
+        self,
+        user_input: dict | None = None,
     ) -> config_entries.FlowResult:
         """Handle a flow initialized by the user."""
         _errors = {}
@@ -34,7 +35,10 @@ class APsystemsLocalAPIFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 if user_input["check"]:
                     api = APsystemsEZ1M(user_input[CONF_IP_ADDRESS])
                     await api.get_device_info()
-            except (client_exceptions.ClientConnectionError, asyncio.TimeoutError) as exception:
+            except (
+                client_exceptions.ClientConnectionError,
+                asyncio.TimeoutError,
+            ) as exception:
                 LOGGER.warning(exception)
                 _errors["base"] = "connection_refused"
             else:
